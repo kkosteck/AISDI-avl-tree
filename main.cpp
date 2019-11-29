@@ -102,6 +102,10 @@ public:
             balance(temp->right);
         }
     }
+	void print(){
+		print(treeRoot);
+	}
+
 
     /*!
      * dodaje wpis do slownika przez podanie pary klucz-wartosc
@@ -263,17 +267,15 @@ private:
 
 	void RL(Node* node) {
 		leftRotation(node->up);
+		evalBalance(node);
 		rightRotation(node->up);
-		//LL(node);
-		//RR(node);
 		evalBalance(node);
 	}
 
 	void LR(Node* node) {
 		rightRotation(node->up);
+		evalBalance(node);
 		leftRotation(node->up);
-		//RR(node);
-		//LL(node);
 		evalBalance(node);
 	}
 
@@ -333,6 +335,14 @@ private:
             return 1 + size(node->left) + size(node->right);
         }
     }
+    
+	void print(Node* node){
+		if(node != NULL){
+			std::cout<<node->key<<" ";
+			print(node->left);
+			print(node->right);
+		}
+	}
 };
 
 #include "tests.h"
@@ -352,12 +362,38 @@ int main()
 	std::string word;
 	int wordCount = 0;
 	
-	while(file>>word && wordCount < 1000){
+	Benchmark<std::chrono::nanoseconds> b;
+	while(file>>word && wordCount < 2000){ //tree insertion time
 		tree.insert(word, wordCount);
 		++wordCount;
 	}
+	size_t elapsedTree1 = b.elapsed();
+	file.close();
 	
-
+	file.open("pan-tadeusz.txt");
+	if(!file.is_open())
+		return 1;
+	
+	wordCount = 0;
+	
+	Benchmark<std::chrono::nanoseconds> c;
+	while(file>>word && wordCount < 2000){ //map insertion time
+		stdMap.insert(std::make_pair(word, wordCount));
+		++wordCount;
+	}
+	size_t elapsedMap1 = c.elapsed();
+	file.close();
+	
+	Benchmark<std::chrono::nanoseconds> d;
+	tree.contains("Tadeusz");
+	size_t elapsedTree2 = d.elapsed();
+	
+	Benchmark<std::chrono::nanoseconds> e;
+	stdMap.find("Tadeusz");
+	size_t elapsedMap2 = e.elapsed();
+	
+	std::cout<<"INSERTION TIME: AVL: "<<elapsedTree1<<" MAP: "<<elapsedMap1<<std::endl;
+	std::cout<<"SEARCHING TIME: AVL: "<<elapsedTree2<<" MAP: "<<elapsedMap2<<std::endl;
 
     return 0;
 }
