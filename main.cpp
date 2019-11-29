@@ -4,8 +4,6 @@
 #include <utility>
 #include <map>
 
-#define INPUT_FILENAME "pan-tadeusz.txt"
-
 /*!
  *  Narzedzie do zliczania czasu
  *
@@ -58,11 +56,110 @@ private:
 template<typename KeyType, typename ValueType>
 class TreeMap
 {
-  public:
+public:
     using key_type = KeyType;
     using mapped_type = ValueType;
     using value_type = std::pair<const key_type, mapped_type>;
 
+    TreeMap() {
+        treeRoot = NULL;
+    }    // konstruktor trywialny
+
+    ~TreeMap() {
+        deleteTree(treeRoot);
+    }   // destruktor trywialny
+
+    /*!
+     * true jezeli slownik jest pusty
+     */
+    bool isEmpty() const {
+        //throw std::runtime_error("TODO: isEmpty");
+        return treeRoot == NULL;
+    }
+
+    /*!
+     * dodaje wpis do slownika
+     */
+    void insert(const key_type& key, const mapped_type &value)
+    {
+        //throw std::runtime_error("TODO: insert");
+        if (treeRoot == NULL) {
+            treeRoot = new Node(key, value);
+            return;
+        }
+        Node* temp = findKey(treeRoot, key);
+        if (temp->key == key) {
+            if (temp->value != 0) {
+                temp->value = value;
+            } else {
+                temp->value += 1;
+            }
+        } else if (temp->key > key) {
+            temp->left = new Node(key, value, temp);
+            balance(temp->left);
+        } else {
+            temp->right = new Node(key, value, temp);
+            balance(temp->right);
+        }
+    }
+
+    /*!
+     * dodaje wpis do slownika przez podanie pary klucz-wartosc
+     */
+    void insert(const value_type &key_value) {
+        //throw std::runtime_error("TODO: insert");
+        insert(key_value.first, key_value.second);
+    }
+
+    /*!
+     * zwraca referencje na wartosc dla podanego klucza
+     *
+     * jezeli elementu nie ma w slowniku, dodaje go
+     */
+    mapped_type& operator[](const key_type& key) {
+        //throw std::runtime_error("TODO: operator[]");
+        Node* temp = findExactlyKey(treeRoot, key);
+        if (temp != NULL){
+            return temp->value;
+        }
+        insert(key, 0);
+        temp = findExactlyKey(treeRoot, key);
+        return temp->value;
+    }
+
+    /*!
+     * zwraca wartosc dla podanego klucza
+     */
+    const mapped_type& value(const key_type& key) const {
+        //throw std::runtime_error("TODO: value");
+        Node* temp = findExactlyKey(treeRoot, key);
+        if (temp == NULL) {
+            throw std::runtime_error("There is no key like that.");
+        }
+        return temp->value;
+    }
+
+    /*!
+     * zwraca informacje, czy istnieje w slowniku podany klucz
+     */
+    bool contains(const key_type& key) const {
+        //throw std::runtime_error("TODO: contains");
+        Node* temp = findExactlyKey(treeRoot, key);
+        if (temp != NULL){
+            return true;
+        }
+        return false;
+    }
+
+    /*!
+     * zwraca liczbe wpisow w slowniku
+     */
+    size_t size() const {
+        //throw std::runtime_error("TODO: size");
+        return size(treeRoot);
+    }
+
+private:
     class Node {
     public:
         Node *up;
@@ -154,46 +251,29 @@ class TreeMap
 			treeRoot = p;
     }
 
-   /* void zig(Node* node) {
-		if (node == (node->up)->left) {
-			rightRotation(node->up);
-		} else {
-			leftRotation(node->up);
-		}
-		evalBalance(node);
-	}
-
-	void zigZig(Node* node) {
-		zig(node->up);
-		zig(node);
-		evalBalance(node);
-	}
-
-	void zigZag(Node* node) {
-		zig(node);
-		zig(node);
-		evalBalance(node);
-	}*/
-	
 	void RR(Node* node) {
 		leftRotation(node->up);
 		evalBalance(node);
 	}
-	
+
 	void LL(Node* node) {
 		rightRotation(node->up);
 		evalBalance(node);
 	}
-	
+
 	void RL(Node* node) {
-		LL(node);
-		RR(node);
+		leftRotation(node->up);
+		rightRotation(node->up);
+		//LL(node);
+		//RR(node);
 		evalBalance(node);
 	}
-	
+
 	void LR(Node* node) {
-		RR(node);
-		LL(node);
+		rightRotation(node->up);
+		leftRotation(node->up);
+		//RR(node);
+		//LL(node);
 		evalBalance(node);
 	}
 
@@ -217,7 +297,7 @@ class TreeMap
                         RR(c);
                     }
                 } else {
-                    if (p->balance < 0) { 
+                    if (p->balance < 0) {
                         p->balance = 0;
                         break;
                     }
@@ -246,115 +326,13 @@ class TreeMap
         }
     }
 
-    TreeMap() {
-        treeRoot = NULL;
-    }    // konstruktor trywialny
-
-    ~TreeMap() {
-        deleteTree(treeRoot);
-    }   // destruktor trywialny
-
-    /*!
-     * true jezeli slownik jest pusty
-     */
-    bool isEmpty() const {
-        //throw std::runtime_error("TODO: isEmpty");
-        return treeRoot == NULL;
-    }
-
-    /*!
-     * dodaje wpis do slownika
-     */
-    void insert(const key_type& key, const mapped_type &value)
-    {
-        //throw std::runtime_error("TODO: insert");
-        if (treeRoot == NULL) {
-            treeRoot = new Node(key, value);
-            return;
-        }
-        Node* temp = findKey(treeRoot, key);
-        if (temp->key == key) {
-            if (temp->value != NULL) {
-                temp->value = value;
-            } else {
-                temp->value += 1;
-            }
-        } else if (temp->key > key) {
-            temp->left = new Node(key, value, temp);
-            balance(temp->left);
-        } else {
-            temp->right = new Node(key, value, temp);
-            balance(temp->right);
-        }
-    }
-
-    /*!
-     * dodaje wpis do slownika przez podanie pary klucz-wartosc
-     */
-    void insert(const value_type &key_value) {
-        //throw std::runtime_error("TODO: insert");
-        insert(key_value.first, key_value.second);
-    }
-
-    /*!
-     * zwraca referencje na wartosc dla podanego klucza
-     *
-     * jezeli elementu nie ma w slowniku, dodaje go
-     */
-    mapped_type& operator[](const key_type& key) {
-        //throw std::runtime_error("TODO: operator[]");
-        Node* temp = findExactlyKey(treeRoot, key);
-        if (temp != NULL){
-            return temp->value;
-        }
-        insert(key, NULL);
-        temp = findExactlyKey(treeRoot, key);
-        return temp->value;
-    }
-
-    /*!
-     * zwraca wartosc dla podanego klucza
-     */
-    const mapped_type& value(const key_type& key) const {
-        //throw std::runtime_error("TODO: value");
-        Node* temp = findExactlyKey(treeRoot, key);
-       /* if (temp == NULL) {
-            std::cout<<"There is no key like "<<key;
-        }*/
-        std::cout<<temp->value<<std::endl;
-        return temp->value;
-    }
-
-    /*!
-     * zwraca informacje, czy istnieje w slowniku podany klucz
-     */
-    bool contains(const key_type& key) const {
-        //throw std::runtime_error("TODO: contains");
-        Node* temp = findExactlyKey(treeRoot, key);
-        if (temp != NULL){
-            return true;
-        }
-        return false;
-    }
-
-    /*!
-     * zwraca liczbe wpisow w slowniku
-     */
-    size_t size() const {
-        //throw std::runtime_error("TODO: size");
-        return sizeOfTree(treeRoot);
-    }
-
-    size_t sizeOfTree( Node *node ) const {
-        if ( node == NULL) {
+    size_t size(Node *node) const {
+        if (node == NULL) {
             return 0;
         } else {
-            return 1 + sizeOfTree(node->left) + sizeOfTree(node->right);
+            return 1 + size(node->left) + size(node->right);
         }
     }
-
-private:
-
 };
 
 #include "tests.h"
@@ -362,61 +340,24 @@ private:
 int main()
 {
     unit_test();
+    
+    class TreeMap<std::string, int> tree;
+    std::map<std::string, int> stdMap;
+    
+    std::ifstream file;
+	file.open("pan-tadeusz.txt");
+	if(!file.is_open())
+		return 1;
+	
+	std::string word;
+	int wordCount = 0;
+	
+	while(file>>word && wordCount < 1000){
+		tree.insert(word, wordCount);
+		++wordCount;
+	}
+	
 
-        /*class TreeMap<std::string, int> tree;
-        std::map<std::string, int> tree2;
-        std::ifstream file;
-        file.open (INPUT_FILENAME);
-        if (!file.is_open()) exit(EXIT_FAILURE);
-        std::string word;
-        int i = 0;
-        while (file >> word && i < 1000) {
-            //std::cout << word << std::endl;
-            tree.insert(word, i);
-            i++;
-        }
-        Benchmark<std::chrono::nanoseconds> t1;
-        while (file >> word && i < 2000) {
-            //std::cout << word << std::endl;
-            tree.insert(word, i);
-            i++;
-        }
-        size_t elapsed1 = t1.elapsed();
-        file.close();
-        file.open (INPUT_FILENAME);
-        if (!file.is_open()) exit(EXIT_FAILURE);
-        i = 0;
-        while (file >> word && i < 1000) {
-            tree2.insert( std::make_pair(word, i) );
-            i++;
-        }
-        Benchmark<std::chrono::nanoseconds> t2;
-        while (file >> word && i < 2000) {
-            tree2.insert( std::make_pair(word, i) );
-            i++;
-        }
-        size_t elapsed2 = t2.elapsed();
-        file.close();
-        file.open (INPUT_FILENAME);
-        if (!file.is_open()) exit(EXIT_FAILURE);
-        Benchmark<std::chrono::nanoseconds> t3;
-        i=0;
-        while (file >> word && i < 2000) {
-            tree.contains( word );
-            i++;
-        }
-        size_t elapsed3 = t3.elapsed();
-        file.open (INPUT_FILENAME);
-        if (!file.is_open()) exit(EXIT_FAILURE);
-        Benchmark<std::chrono::nanoseconds> t4;
-        i=0;
-        while (file >> word && i < 2000) {
-            tree2.find( word );
-            i++;
-        }
-        size_t elapsed4 = t4.elapsed();
-        std::cout << "AVL: " << elapsed1 << ", search: " << elapsed3 << std::endl;
-        std::cout << "map: " << elapsed2 << ", search: " << elapsed4 << std::endl;*/
 
     return 0;
 }
