@@ -3,6 +3,7 @@
 #include <chrono>
 #include <utility>
 #include <map>
+#include <vector>
 
 /*!
  *  Narzedzie do zliczania czasu
@@ -351,49 +352,80 @@ int main()
 {
     unit_test();
     
-    class TreeMap<std::string, int> tree;
-    std::map<std::string, int> stdMap;
-    
-    std::ifstream file;
-	file.open("pan-tadeusz.txt");
-	if(!file.is_open())
-		return 1;
-	
-	std::string word;
-	int wordCount = 0;
-	
-	Benchmark<std::chrono::nanoseconds> b;
-	while(file>>word && wordCount < 2000){ //tree insertion time
-		tree.insert(word, wordCount);
-		++wordCount;
-	}
-	size_t elapsedTree1 = b.elapsed();
-	file.close();
-	
-	file.open("pan-tadeusz.txt");
-	if(!file.is_open())
-		return 1;
-	
-	wordCount = 0;
-	
-	Benchmark<std::chrono::nanoseconds> c;
-	while(file>>word && wordCount < 2000){ //map insertion time
-		stdMap.insert(std::make_pair(word, wordCount));
-		++wordCount;
-	}
-	size_t elapsedMap1 = c.elapsed();
-	file.close();
-	
-	Benchmark<std::chrono::nanoseconds> d;
-	tree.contains("Tadeusz");
-	size_t elapsedTree2 = d.elapsed();
-	
-	Benchmark<std::chrono::nanoseconds> e;
-	stdMap.find("Tadeusz");
-	size_t elapsedMap2 = e.elapsed();
-	
-	std::cout<<"INSERTION TIME: AVL: "<<elapsedTree1<<" MAP: "<<elapsedMap1<<std::endl;
-	std::cout<<"SEARCHING TIME: AVL: "<<elapsedTree2<<" MAP: "<<elapsedMap2<<std::endl;
 
+	
+	for (int i = 1000; i < 50000; i += 1000) {
+		
+		class TreeMap<std::string, int> tree;
+		std::map<std::string, int> stdMap;
+		
+		std::ifstream file;
+		file.open("pan-tadeusz.txt");
+		if(!file.is_open())
+			return 1;
+		
+		std::string word;
+		int wordCount = 0;
+		
+		Benchmark<std::chrono::nanoseconds> b;
+		while(file>>word && wordCount < i){ //tree insertion time
+			tree.insert(word, wordCount);
+			++wordCount;
+		}
+		size_t elapsedTree1 = b.elapsed();
+		file.close();
+		
+		file.open("pan-tadeusz.txt");
+		if(!file.is_open())
+			return 1;
+		
+		wordCount = 0;
+		
+		Benchmark<std::chrono::nanoseconds> c;
+		while(file>>word && wordCount < i){ //map insertion time
+			stdMap.insert(std::make_pair(word, wordCount));
+			++wordCount;
+		}
+		size_t elapsedMap1 = c.elapsed();
+		file.close();
+		
+		file.open("pan-tadeusz.txt");
+		if(!file.is_open())
+			return 1;
+		
+		wordCount = 0;
+		std::vector<std::string> vec;
+			
+		while(file>>word && wordCount < i){
+			vec.push_back(word);
+			++wordCount;
+		}
+		file.close();
+		
+		size_t elapsedTree2 = 0;
+		size_t elapsedMap2 = 0;
+		int forsize = 0;
+		
+		for (int k = 0; k < i; k += 100) {
+			
+			forsize++;
+		
+			Benchmark<std::chrono::nanoseconds> d;
+			tree.contains(vec[k]);
+			elapsedTree2 += d.elapsed();
+			
+			Benchmark<std::chrono::nanoseconds> e;
+			stdMap.find(vec[k]);
+			elapsedMap2 += e.elapsed();
+		
+		}
+		
+		elapsedTree2 = elapsedTree2/forsize;
+		elapsedMap2 = elapsedMap2/forsize;
+		
+		std::cout<<i<<" INSERT: AVL: "<<elapsedTree1<<" MAP: "<<elapsedMap1;
+		std::cout<<" SEARCH: AVL: "<<elapsedTree2<<" MAP: "<<elapsedMap2<<std::endl;
+
+	}
     return 0;
 }
