@@ -258,44 +258,60 @@ private:
 
 	void RR(Node* node) {
 		leftRotation(node->up);
-		evalBalance(node);
+		if(node->balance == -1) 
+			node->left->balance = node->balance = 0;
+		else{
+			node->left->balance  = -1; 
+			node->balance = 1;
+		}
 	}
 
 	void LL(Node* node) {
 		rightRotation(node->up);
-		evalBalance(node);
-	}
-
-	void RL(Node* node) {
-		leftRotation(node->up);
-		evalBalance(node);
-		rightRotation(node->up);
-		evalBalance(node);
+		if(node->balance == 1) 
+			node->right->balance = node->balance = 0;
+		else{
+			node->right->balance = 1; 
+			node->balance = -1;
+		}
 	}
 
 	void LR(Node* node) {
-		rightRotation(node->up);
-		evalBalance(node);
 		leftRotation(node->up);
-		evalBalance(node);
+		rightRotation(node->up);
+		if( node->balance == 1 ) 
+			node->left->balance =  -11; 
+		else 
+			node->left->balance = 0;
+		if( node->balance==  -1 ) 
+			node->right->balance = 1; 
+		else 
+			node->right->balance = 0;
+
+		node->balance = 0;
 	}
 
-    void evalBalance(Node* node) {
-		node->balance = (NULL != node->right) - (NULL != node->left);
-		if (NULL != node->left) {
-			node->left->balance = (NULL != node->left->right) - (NULL != node->left->left);
-		}
-		if (NULL != node->right) {
-			node->right->balance = (NULL != node->right->right) - (NULL != node->right->left);
-		}
+	void RL(Node* node) {
+		rightRotation(node->up);
+		leftRotation(node->up);
+		if( node->balance == -1 ) 
+			node->left->balance =  1; 
+		else 
+			node->left->balance = 0;
+		if( node->balance==  1 ) 
+			node->right->balance = -1; 
+		else 
+			node->right->balance = 0;
+
+		node->balance = 0;
 	}
 
     void balance(Node* c) {
         for (Node* p = c->up; p != NULL; p = c->up) {
             if (c == p->right) {  //R
                 if (p->balance > 0) { //R
-                    if (c->balance < 0){ //LR
-                        LR(c->left);
+                    if (c->balance < 0){ //RL
+                        RL(c->left);
                     } else { //RR
                         RR(c);
                     }
@@ -310,8 +326,8 @@ private:
                 }
             } else { //L
                 if (p->balance < 0) { //L
-                    if (c->balance > 0){ //RL
-                        RL(c->right);
+                    if (c->balance > 0){ //LR
+                        LR(c->right);
                     } else { //LL
                         LL(c);
                     }
@@ -353,7 +369,7 @@ int main()
     unit_test();
     
 
-	
+	std::cout<<"WORDS  "<<"INSERT  "<<"AVL  "<<"MAP  "<<"SEARCH  "<<"AVL  "<<"MAP"<<std::endl;
 	for (int i = 1000; i < 50000; i += 1000) {
 		
 		class TreeMap<std::string, int> tree;
@@ -423,8 +439,8 @@ int main()
 		elapsedTree2 = elapsedTree2/forsize;
 		elapsedMap2 = elapsedMap2/forsize;
 		
-		std::cout<<i<<" INSERT: AVL: "<<elapsedTree1<<" MAP: "<<elapsedMap1;
-		std::cout<<" SEARCH: AVL: "<<elapsedTree2<<" MAP: "<<elapsedMap2<<std::endl;
+		std::cout<<i<<"  "<<elapsedTree1<<"  "<<elapsedMap1<<"  ";
+		std::cout<<elapsedTree2<<"  "<<elapsedMap2<<std::endl;
 
 	}
     return 0;
