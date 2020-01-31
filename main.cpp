@@ -258,33 +258,33 @@ private:
 
 	void RR(Node* node) {
 		leftRotation(node->up);
-		if(node->balance == -1) 
+		if(node->balance == 1) 
 			node->left->balance = node->balance = 0;
 		else{
-			node->left->balance  = -1; 
-			node->balance = 1;
+			node->left->balance  = 1; 
+			node->balance = -1;
 		}
 	}
 
 	void LL(Node* node) {
 		rightRotation(node->up);
-		if(node->balance == 1) 
+		if(node->balance == -1) 
 			node->right->balance = node->balance = 0;
 		else{
-			node->right->balance = 1; 
-			node->balance = -1;
+			node->right->balance = -1; 
+			node->balance = 1;
 		}
 	}
 
 	void LR(Node* node) {
 		leftRotation(node->up);
 		rightRotation(node->up);
-		if( node->balance == 1 ) 
-			node->left->balance =  -11; 
+		if( node->balance == -1 ) 
+			node->left->balance =  1; 
 		else 
 			node->left->balance = 0;
-		if( node->balance==  -1 ) 
-			node->right->balance = 1; 
+		if( node->balance==  1 ) 
+			node->right->balance = -1; 
 		else 
 			node->right->balance = 0;
 
@@ -294,12 +294,12 @@ private:
 	void RL(Node* node) {
 		rightRotation(node->up);
 		leftRotation(node->up);
-		if( node->balance == -1 ) 
-			node->left->balance =  1; 
+		if( node->balance == 1 ) 
+			node->left->balance =  -1; 
 		else 
 			node->left->balance = 0;
-		if( node->balance==  1 ) 
-			node->right->balance = -1; 
+		if( node->balance==  -1 ) 
+			node->right->balance = 1; 
 		else 
 			node->right->balance = 0;
 
